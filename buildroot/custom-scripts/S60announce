@@ -1,0 +1,20 @@
+#!/bin/sh
+PIDFILE=/run/announced.pid
+case "${1:-}" in
+    start)
+        printf 'Starting IP Announcement: '
+        start-stop-daemon -S -q -m -b -p "$PIDFILE" -x /usr/bin/announced.sh
+        result=$?
+        [ "$result" -eq 0 ] && echo OK || echo FAIL
+        exit "$result"
+        ;;
+    stop)
+        printf 'Stopping IP Announcement: '
+        start-stop-daemon -K -q -p "$PIDFILE" -s TERM
+        result=$?
+        rm -f "$PIDFILE"
+        [ "$result" -eq 0 ] && echo OK || echo STOPPED
+        ;;
+    restart|reload) "$0" stop; "$0" start ;;
+    *) echo "Usage: $0 {start|stop|restart}"; exit 1 ;;
+esac
